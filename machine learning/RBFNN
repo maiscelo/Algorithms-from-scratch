@@ -1,0 +1,47 @@
+def rbfnn(trainx,centro_3):
+    sigma=[]
+    sigma2=[]
+    sigma3=[]
+    somatorio=0
+    somatorio2=0
+    somatorio3=0
+    for i in range(120):
+        for d in range(4):
+            somatorio=(trainx[i][d]-centro_3[0][d])**2+somatorio
+            somatorio2=(trainx[i][d]-centro_3[1][d])**2+somatorio2
+            somatorio3=(trainx[i][d]-centro_3[2][d])**2+somatorio3
+        sigma.append(math.exp(-(somatorio)/h))
+        sigma2.append(math.exp(-(somatorio2)/h)) 
+        sigma3.append(math.exp(-(somatorio3)/h))
+    g=sigma,sigma2,sigma3
+    return g
+camada1=rbfnn(trainx,centro_3)
+camada1=np.asarray(camada1)
+gt=np.transpose(camada1)
+c=gt.dot(camada1)
+c= inv(np.matrix(c))
+d=c.dot(gt)
+d=np.transpose(d)
+w=d.dot(trainy)
+def predicao(dado):
+    sigma=[]
+    sigma2=[]
+    sigma3=[]
+    somatorio=0
+    somatorio2=0
+    somatorio3=0
+    for i in range(30):
+        for d in range(4):
+            somatorio=(dado[i][d]-centro_3[0][d])**2+somatorio
+            somatorio2=(dado[i][d]-centro_3[1][d])**2+somatorio2
+            somatorio3=(dado[i][d]-centro_3[2][d])**2+somatorio3
+        sigma.append(math.exp(-(somatorio)/h))
+        sigma2.append(math.exp(-(somatorio2)/h)) 
+        sigma3.append(math.exp(-(somatorio3)/h))
+    g_pre=sigma,sigma2,sigma3
+    return g_pre
+g_pred=predicao(testx)
+g_pred=np.asarray(g_pred)
+g_pred=np.transpose(g_pred)
+w=np.transpose(w)
+t=g_pred.dot(w)
