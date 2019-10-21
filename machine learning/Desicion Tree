@@ -1,0 +1,107 @@
+class arvore:
+    alea=[]
+    def __init__(self):
+        self.atributo =[]
+        self.folha=4
+        for i in range(self.folha):
+            self.alea.append(trainx[random.randrange(0,120),i])
+    def inf_gain(self,recurso):
+        for j in range(self.folha):
+            count=0
+            coun=0
+            class1=0
+            class2=0
+            class3=0
+            class_1=0
+            class_2=0
+            class_3=0
+            entro_dir=0
+            entro_esq=0
+            for i in range(120):
+                if trainx[i,j]<=self.alea[j]:
+                    if trainy[i]==0:
+                        class1+=1
+                    if trainy[i]==1:
+                        class2+=1
+                    if trainy[i]==2:
+                        class3+=1
+                    count+=1
+                if trainx[i,j]>self.alea[j]:
+                    if trainy[i]==0:
+                        class_1+=1
+                    if trainy[i]==1:
+                        class_2+=1
+                    if trainy[i]==2:
+                        class_3+=1
+                    coun+=1
+            print(count,coun)
+            if count!=0:
+                class1=class1/count
+                class2=class2/count
+                class3=class3/count
+            if class1 and class2 and class3!=0:
+                entro_esq=-1*((class1)*math.log(class1,2)+(class2)*math.log(class2,2)\
+                +(class3)*math.log(class3,2))
+            if class1 or class2 or class3==0:
+                if class1==0 and class2>0 and class3>0:
+                    entro_esq=-1*((class1)+(class2)*math.log(class2,2)\
+                    +(class3)*math.log(class3,2))
+                if class2==0 and class3>0 and class1>0:
+                    entro_esq=-1*((class1*math.log(class1,2))+class2\
+                    +(class3)*math.log(class3,2))
+                if class3==0 and class2>0 and class1>0:
+                    entro_esq=-1*((class1*math.log(class1,2))+(class2)*math.log(class2,2)\
+                    +class3)
+                if class1==0 and class2==0 and class3!=0:
+                    entro_esq=-1*((class1)+(class2)\
+                    +(class3)*math.log(class3,2))
+                if class1==0 and class3==0 and class2!=0:
+                    entro_esq=-1*(class1+(class2)*math.log(class2,2)\
+                    +class3)
+                if class2==0 and class3==0 and class1!=0:
+                    entro_esq=-1*(class1*math.log(class1,2)+class2\
+                    +class3)
+                if class1==0 and class2==0 and class3==0:
+                    entro_esq=class1+class2+class3
+            if count==0: 
+                entro_esq=0
+            if coun!=0:
+                class_1=class_1/coun
+                class_2=class_2/coun
+                class_3=class_3/coun    
+            if class_1 and class_2 and class_3!=0:
+                entro_dir=-1*(class_1*math.log(class_1,2)+(class_2)*math.log((class_2),2)\
+                +(class_3)*math.log((class_3),2))
+            if class_1 or class_2 or class_3==0:
+                if class_1==0 and class_2>0 and class_3>0:
+                    entro_dir=-1*(class_1+(class_2)*math.log((class_2),2)\
+                    +(class_3)*math.log((class_3),2))
+                if class_2==0 and class_1>0 and class_3>0:
+                    entro_dir=-1*(class_1*math.log(class_1,2)+class_2\
+                    +(class_3)*math.log((class_3),2))
+                if class_3==0 and class_1>0 and class_2>0:
+                    entro_dir=-1*(class_1*math.log(class_1,2)+(class_2)*math.log((class_2),2)\
+                    +(class_3))
+                if class_1==0 and class_2==0 and class_3!=0:
+                    entro_dir=-1*(class_1+class_2\
+                    +(class_3)*math.log((class_3),2))
+                if class_1==0 and class_3==0 and class_2!=-0:
+                    entro_dir=-1*(class_1+(class_2)*math.log((class_2),2)\
+                    +(class_3))
+                if class_2==0 and class_3==0 and class_1!=0:
+                    entro_dir=-1*(class_1*math.log(class_1,2)+class_2\
+                    +(class_3))
+                if class_1==0 and class_2==0 and class_3==0:
+                    entro_dir=class_1+class_2+class_3
+            if coun==0:
+                entro_dir=0
+            
+            ig=-1*(0.33*math.log2(0.33)+0.33*math.log2(0.33)+0.33*math.log2(0.33))
+            ig2=((count/120)*(entro_esq)+(coun/120)*(entro_dir))            
+            self.atributo.append(ig-ig2)
+        return self.atributo
+g=arvore()#um nó, uma seta e um folha()
+h=g.inf_gain('recurso')
+ig=np.array(h)
+node=np.argmax(ig)
+node1=g.alea[node]
