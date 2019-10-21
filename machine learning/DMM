@@ -1,0 +1,42 @@
+#Calculo da distâbcia minima distancia para media
+def distancia(dado):
+   muclass_0=[]
+   muclass_1=[]
+   muclass_2=[]
+   varclass_0=[]
+   varclass_1=[]
+   varclass_2=[]
+#for j in range(3):
+   for i in range(4):
+       #mu=np.mean(data[trainy==0,i])
+        muclass_0.append(np.mean(trainx[trainy==0,i]))
+       muclass_1.append(np.mean(trainx[trainy==1,i]))
+       muclass_2.append(np.mean(trainx[trainy==2,i]))
+d=0
+   for i in range(4):
+       d0=(dado[i]-muclass_0[i])**2+d
+       d1=(dado[i]-muclass_1[i])**2+d
+       d2=(dado[i]-muclass_2[i])**2+d
+    return np.sqrt(d0),np.sqrt(d1),np.sqrt(d2)
+confusao=[[0,0,0],
+[0,0,0],
+[0,0,0]]
+for i in range(5):
+   resulta=[]
+   fold(data)
+for i in range(30):
+    resulta.append(distancia(testx[i,0:4]))
+    x=np.asarray(resulta)
+    previsao=[]
+for i in range(30):
+    previsao.append(np.argmin(x[i]))
+    y=np.asarray(previsao)
+    errors = np.sum(y!= testy)
+for i in range(30):
+   if y[i]==testy[i]:
+   confusao[int(testy[i])][y[i]]=confusao[int(testy[i])][y[i]] +1
+   else:
+   confusao[int(testy[i])][y[i]]=confusao[int(testy[i])][y[i]] +1
+print('Mínima distância para média')
+for i in confusao:
+print(i)
