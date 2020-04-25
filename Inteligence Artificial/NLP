@@ -113,7 +113,7 @@ def completa(ent,contador):
                  i+=1
         contador+=1 
         if contador==ent-1:
-             return tab
+              return tab
         else:
              completa(ent-1,contador)
 completa(ent,contador)
