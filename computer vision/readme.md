@@ -4,3 +4,6 @@ Dataset disponível em: http://vision.eecs.yorku.ca/research/anomalous-behaviour
 
 
 ![](nav.gif)
+
+
+![](lanc.gif)
