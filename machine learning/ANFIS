@@ -1,0 +1,136 @@
+import cv2
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import TensorDataset
+import torchvision
+import torchvision.transforms as transforms
+from torchvision.utils import make_grid
+
+import os
+import glob
+import os
+import matplotlib.pyplot as plt
+import string
+
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.model_selection import train_test_split, cross_val_score
+
+path=r'C:\Users\macc\Documents\Python Scripts\i-LIDS-VID\sequences\cam1' + '\\' +'*'
+path2=r'C:\Users\macc\Documents\Python Scripts\i-LIDS-VID\sequences\cam2' + '\\' +'*'
+imagens=[]
+labels=[]
+imagens2=[]
+labels2=[]
+
+l=1
+for image_path in glob.glob(path):
+    person = image_path[65:74]
+    for data in glob.glob(image_path + '\\'+'*.png'):
+        image = cv2.imread(data, cv2.IMREAD_COLOR)
+        imagens.append(image)
+        labels.append(l)
+    l+=1    
+imagens = np.array(imagens)
+labels = np.array(labels)
+
+l=1
+for image_path in glob.glob(path2):
+    person = image_path[65:74]
+    for data in glob.glob(image_path + '\\'+'*.png'):
+        image = cv2.imread(data, cv2.IMREAD_COLOR)
+        imagens2.append(image)
+        labels2.append(l)
+    l+=1   
+imagens2 = np.array(imagens2)
+labels2 = np.array(labels2)
+im_total = np.concatenate((imagens, imagens2), axis=0)
+labels_total = np.concatenate((labels, labels2), axis=0)
+X_train, X_test, y_train, y_test = train_test_split(im_total, labels_total, test_size=0.33, random_state=42)
+scaler = StandardScaler()
+X_t = scaler.fit_transform([i.flatten() for i in X_train])
+X_test = scaler.fit_transform([i.flatten() for i in X_test])
+
+pca = PCA(n_components=2)
+dataIn2D = pca.fit_transform(X_t)
+testeIn2D = pca.fit_transform(X_test)
+
+y_train =torch.reshape(y_train, (1287, 1))
+y_valid =torch.reshape(y_valid, (634, 1))
+y_train = y_train -1
+y_valid = y_valid -1
+x_train, y_train, x_valid, y_valid = map(torch.tensor, (dataIn2D, y_train, testeIn2D, y_test))
+
+train_ds = TensorDataset(x_train.float(), y_train.float())
+valid_ds = TensorDataset(x_valid.float(), y_valid.float())
+train_loader = DataLoader(dataset=train_ds, batch_size=128, shuffle=True)
+valid_loader = DataLoader(dataset=valid_ds, batch_size=128, shuffle=False)
+dataiter = iter(train_loader)
+images, labels = dataiter.next()
+
+print('images shape on PyTroch : ', images.size())
+print('labels shape on PyTroch : ', labels.size())
+
+from torch import optim
+class MLP(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(500, 100),
+            nn.ReLU(),
+            nn.Linear(100, 10)
+        )
+    def forward(self, xb):
+        return self.layers(xb)
+def get_model():
+    model = MLP()
+    return model, optim.SGD(model.parameters(), lr=0.005)
+model, opt = get_model()
+
+train_losses = []
+valid_losses = []
+mean_train_losses=[]
+mean_valid_losses = []
+valid_acc_list = []
+for epoch in range(100):
+    model.train()
+    for xb, yb in train_loader:
+        #xb=xb.type(torch.DoubleTensor)
+        yb=yb-1
+        #print(yb)
+        yb=yb.type(torch.LongTensor)
+        pred = model(xb)
+        loss = loss_func(pred, yb)
+        train_losses.append(loss.item())
+
+        loss.backward()
+        opt.step()
+        opt.zero_grad()
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for xb, yb in valid_loader:
+            yb=yb-1
+            yb=yb.type(torch.LongTensor)
+            valid_loss = loss_func(model(xb), yb)
+            valid_losses.append(valid_loss.item())
+            outputs = model(xb)
+            _, predicted = torch.max(outputs.data, 1)
+            correct += (predicted == yb).sum().item()
+            total += yb.size(0)
+
+        #print(epoch, valid_loss / len(valid_loader))
+    mean_train_losses.append(np.mean(train_losses))
+    mean_valid_losses.append(np.mean(valid_losses))
+    accuracy = 100*correct/total
+    valid_acc_list.append(accuracy)
+    
+
+
